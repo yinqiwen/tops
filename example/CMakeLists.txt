@@ -17,3 +17,6 @@ target_link_libraries(test_arrayfire PUBLIC -lcublas -lcublasLt -lcudart tops)
 
 add_executable(test_exponential test_exponential.cc)
 target_link_libraries(test_exponential PUBLIC -lcublas -lcublasLt -lcudart tops)
+
+add_executable(test_repeat test_repeat.cc)
+target_link_libraries(test_repeat PUBLIC -lcublas -lcublasLt -lcudart tops)

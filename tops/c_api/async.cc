@@ -1,8 +1,7 @@
 /*
 ** BSD 3-Clause License
 **
-** Copyright (c) 2023, qiyingwang <qiyingwang@tencent.com>, the respective
-*contributors, as shown by the AUTHORS file.
+** Copyright (c) 2023, qiyingwang <qiyingwang@tencent.com>, the respective contributors, as shown by the AUTHORS file.
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -20,8 +19,7 @@
 **
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-*ARE
+** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 ** FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 ** DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -31,45 +29,14 @@
 ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
-#include <cuda_runtime_api.h>
-#include <stdint.h>
+#include <string>
+#include <vector>
+#include "tops/c_api/c_api.h"
 extern "C" {
-typedef enum {
-  DATA_U8 = 0,
-  DATA_F16,
-  DATA_BF16,
-  DATA_F32,
-  DATA_F64,
-  DATA_U32,
-  DATA_I64,
-} ScalarType;
 
-struct CTensorView {
-  void *ptr = nullptr;
-  uint32_t shape[4];
-  uint32_t dtype;
-};
+void cuda_async_htod(void* dptr, const void* hptr, int64_t n, cudaStream_t stream) {
+  cudaMemcpyAsync(dptr, hptr, n, cudaMemcpyKind::cudaMemcpyHostToDevice, stream);
+}
 
-cudaDeviceProp *getCudaDeviceProp();
-void cuda_reset_random_seed(uint64_t seed);
-
-size_t get_tensor_element_count(const CTensorView *tensor);
-
-void cuda_sort_tensor(CTensorView input, uint32_t dim, bool ascend, cudaStream_t stream, CTensorView output,
-                      CTensorView indices);
-
-void cuda_cumsum_tensor(CTensorView input, uint32_t dim, cudaStream_t stream, CTensorView output);
-
-void cuda_topk_tensor(CTensorView input, int k, int dim, int topk_type, cudaStream_t stream, CTensorView output,
-                      CTensorView indices);
-
-void cuda_create_exponential_tensor(float lambd, cudaStream_t stream, CTensorView output);
-
-void cuda_repeat_tensor(CTensorView input, uint32_t dim0, uint32_t dim1, uint32_t dim2, uint32_t dim3,
-                        cudaStream_t stream, CTensorView output);
-
-void cuda_async_htod(void *dptr, const void *hptr, int64_t n, cudaStream_t stream);
-
-void cuda_async_set(void *dptr, int v, int n, cudaStream_t stream);
+void cuda_async_set(void* dptr, int v, int n, cudaStream_t stream) { cudaMemsetAsync(dptr, v, n, stream); }
 }
