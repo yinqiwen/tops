@@ -47,11 +47,17 @@ typedef enum {
 
 struct CTensorView {
   void *ptr = nullptr;
-  uint32_t shape[4];
+  int64_t shape[4];
+  int64_t stride[4];
   uint32_t dtype;
+  int ndim;
 };
 
 cudaDeviceProp *getCudaDeviceProp();
+
+size_t element_size(ScalarType type);
+bool is_tensor_contiguous(const CTensorView *t);
+
 void cuda_reset_random_seed(uint64_t seed);
 
 size_t get_tensor_element_count(const CTensorView *tensor);
@@ -72,4 +78,6 @@ void cuda_repeat_tensor(CTensorView input, uint32_t dim0, uint32_t dim1, uint32_
 void cuda_async_htod(void *dptr, const void *hptr, int64_t n, cudaStream_t stream);
 
 void cuda_async_set(void *dptr, int v, int n, cudaStream_t stream);
+
+void cuda_scatter_tensor(CTensorView index, CTensorView src, int64_t dim, CTensorView dst, cudaStream_t stream);
 }

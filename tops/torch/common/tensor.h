@@ -1,8 +1,7 @@
 /*
 ** BSD 3-Clause License
 **
-** Copyright (c) 2023, qiyingwang <qiyingwang@tencent.com>, the respective
-*contributors, as shown by the AUTHORS file.
+** Copyright (c) 2023, qiyingwang <qiyingwang@tencent.com>, the respective contributors, as shown by the AUTHORS file.
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -20,8 +19,7 @@
 **
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-*ARE
+** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 ** FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 ** DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -30,54 +28,45 @@
 ** OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "tops/c_api/c_api.h"
-#include <string>
+
+#pragma once
+#include <cstring>
 #include <vector>
+#include "tops/c_api/c_api.h"
+
+namespace at::native {
+using DimVector = std::vector<int64_t>;
+}
+
 extern "C" {
 
-cudaDeviceProp *getCudaDeviceProp() {
-  static cudaDeviceProp *default_props = nullptr;
-  static cudaDeviceProp props;
-  if (nullptr == default_props) {
-    cudaGetDeviceProperties(&props, 0);
-    default_props = &props;
+inline at::native::DimVector tensor_get_shape(const CTensorView& t) {
+  at::native::DimVector s(t.ndim);
+  for (int i = 0; i < t.ndim; i++) {
+    s[i] = t.shape[i];
   }
-  return default_props;
+  return s;
 }
-size_t get_tensor_element_count(const CTensorView *tensor) {
-  return tensor->shape[0] * tensor->shape[1] * tensor->shape[2] * tensor->shape[3];
-}
-size_t element_size(ScalarType type) {
-  switch (type) {
-    case ScalarType::DATA_U8: {
-      return 1;
-    }
-    case ScalarType::DATA_BF16:
-    case ScalarType::DATA_F16: {
-      return 2;
-    }
-    case ScalarType::DATA_U32:
-    case ScalarType::DATA_F32: {
-      return 4;
-    }
-    case ScalarType::DATA_I64:
-    case ScalarType::DATA_F64: {
-      return 8;
-    }
-    default: {
-      return 0;
-    }
+inline at::native::DimVector tensor_get_stride(const CTensorView& t) {
+  at::native::DimVector s(t.ndim);
+  for (int i = 0; i < t.ndim; i++) {
+    s[i] = t.stride[i];
   }
+  return s;
 }
 
-bool is_tensor_contiguous(const CTensorView *t) {
-  if (t->ndim == 1) {
-    return true;
-  }
-  if (t->stride[t->ndim - 1] != 1) {
-    return false;
-  }
-  // todo
-  return true;
+inline CTensorView restride_dim(const CTensorView& t, int64_t dim, const int64_t* replacement_shape) {
+  CTensorView result = t;
+  result.stride[dim] = 0;
+  memcpy(result.shape, replacement_shape, sizeof(int64_t) * 4);
+  return result;
+}
+
+inline CTensorView tensor_as_strided(const CTensorView& t, const int64_t* replacement_shape,
+                                     const int64_t* replacement_strides) {
+  CTensorView result = t;
+  memcpy(result.shape, replacement_shape, sizeof(int64_t) * 4);
+  memcpy(result.stride, replacement_strides, sizeof(int64_t) * 4);
+  return result;
 }
 }

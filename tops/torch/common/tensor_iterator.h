@@ -1,8 +1,7 @@
 /*
 ** BSD 3-Clause License
 **
-** Copyright (c) 2023, qiyingwang <qiyingwang@tencent.com>, the respective
-*contributors, as shown by the AUTHORS file.
+** Copyright (c) 2023, qiyingwang <qiyingwang@tencent.com>, the respective contributors, as shown by the AUTHORS file.
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -20,8 +19,7 @@
 **
 ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-*ARE
+** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 ** DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 ** FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 ** DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -30,54 +28,44 @@
 ** OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "tops/c_api/c_api.h"
-#include <string>
+
+#pragma once
 #include <vector>
-extern "C" {
+#include "tops/c_api/c_api.h"
+#include "tops/torch/common/tensor.h"
 
-cudaDeviceProp *getCudaDeviceProp() {
-  static cudaDeviceProp *default_props = nullptr;
-  static cudaDeviceProp props;
-  if (nullptr == default_props) {
-    cudaGetDeviceProperties(&props, 0);
-    default_props = &props;
-  }
-  return default_props;
-}
-size_t get_tensor_element_count(const CTensorView *tensor) {
-  return tensor->shape[0] * tensor->shape[1] * tensor->shape[2] * tensor->shape[3];
-}
-size_t element_size(ScalarType type) {
-  switch (type) {
-    case ScalarType::DATA_U8: {
-      return 1;
-    }
-    case ScalarType::DATA_BF16:
-    case ScalarType::DATA_F16: {
-      return 2;
-    }
-    case ScalarType::DATA_U32:
-    case ScalarType::DATA_F32: {
-      return 4;
-    }
-    case ScalarType::DATA_I64:
-    case ScalarType::DATA_F64: {
-      return 8;
-    }
-    default: {
-      return 0;
-    }
-  }
-}
+namespace at::native {
+#define C10_SIZES_AND_STRIDES_MAX_INLINE_SIZE 5
+constexpr size_t kDimVectorStaticSize = C10_SIZES_AND_STRIDES_MAX_INLINE_SIZE;
+/// A container for sizes or strides
+class TensorIterator {
+ private:
+  std::vector<CTensorView> operands_;
+  std::vector<int64_t> perm_;
+  DimVector shape_;
+  bool all_ops_same_shape_ = false;
+  bool all_ops_are_scalars_ = false;
+  bool is_reduction_ = false;
+  bool has_coalesced_dimensions_ = false;
 
-bool is_tensor_contiguous(const CTensorView *t) {
-  if (t->ndim == 1) {
-    return true;
+  void compute_shape();
+  void compute_strides();
+  void reorder_dimensions();
+  void permute_dimensions(const std::vector<int64_t>& perm);
+  void coalesce_dimensions();
+
+ public:
+  TensorIterator(const std::vector<CTensorView>& ts) : operands_(ts) { compute_shape(); }
+  void* get_ptr(int i) const { return operands_[i].ptr; }
+  int ndim() const { return shape_.size(); }
+  const DimVector& shape() const { return shape_; }
+  const int64_t* strides(int i) const { return operands_[i].stride; }
+  int64_t numel() const {
+    int64_t numel = 1;
+    for (int64_t size : shape_) {
+      numel *= size;
+    }
+    return numel;
   }
-  if (t->stride[t->ndim - 1] != 1) {
-    return false;
-  }
-  // todo
-  return true;
-}
-}
+};
+}  // namespace at::native
