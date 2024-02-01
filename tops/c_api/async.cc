@@ -37,6 +37,9 @@ extern "C" {
 void cuda_async_htod(void* dptr, const void* hptr, int64_t n, cudaStream_t stream) {
   cudaMemcpyAsync(dptr, hptr, n, cudaMemcpyKind::cudaMemcpyHostToDevice, stream);
 }
+void cuda_async_dtod(void* dptr, const void* hptr, int64_t n, cudaStream_t stream) {
+  cudaMemcpyAsync(dptr, hptr, n, cudaMemcpyKind::cudaMemcpyDeviceToDevice, stream);
+}
 
 void cuda_async_set(void* dptr, int v, int n, cudaStream_t stream) { cudaMemsetAsync(dptr, v, n, stream); }
 }

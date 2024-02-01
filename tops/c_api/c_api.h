@@ -76,8 +76,11 @@ void cuda_repeat_tensor(CTensorView input, uint32_t dim0, uint32_t dim1, uint32_
                         cudaStream_t stream, CTensorView output);
 
 void cuda_async_htod(void *dptr, const void *hptr, int64_t n, cudaStream_t stream);
+void cuda_async_dtod(void *dptr, const void *hptr, int64_t n, cudaStream_t stream);
 
 void cuda_async_set(void *dptr, int v, int n, cudaStream_t stream);
 
 void cuda_scatter_tensor(CTensorView index, CTensorView src, int64_t dim, CTensorView dst, cudaStream_t stream);
+
+void cuda_softmax_tensor(CTensorView input, int algorithm, cudaStream_t stream, CTensorView output);
 }

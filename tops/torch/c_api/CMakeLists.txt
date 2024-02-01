@@ -14,7 +14,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 #
-file(GLOB SRCS *.cpp)
+file(GLOB SRCS *.cc)
 file(GLOB CU_SRCS *.cu)
 add_library(torch_c_api_src OBJECT ${SRCS} ${CU_SRCS})
 

@@ -23,3 +23,6 @@ target_link_libraries(test_repeat PUBLIC -lcublas -lcublasLt -lcudart tops)
 
 add_executable(test_scatter test_scatter.cc)
 target_link_libraries(test_scatter PUBLIC -lcublas -lcublasLt -lcudart tops)
+
+add_executable(test_softmax test_softmax.cc)
+target_link_libraries(test_softmax PUBLIC -lcublas -lcublasLt -lcudart tops)

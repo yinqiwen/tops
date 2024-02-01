@@ -15,7 +15,8 @@
 # the License.
 #
 file(GLOB SRCS *.cc)
+file(GLOB CU_SRCS *.cu)
 
-add_library(oneflow_c_api_src OBJECT ${SRCS})
+add_library(oneflow_c_api_src OBJECT ${SRCS} ${CU_SRCS})
 set_property(TARGET oneflow_c_api_src PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET oneflow_c_api_src PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
