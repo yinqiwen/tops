@@ -45,6 +45,11 @@ typedef enum {
   DATA_I64,
 } ScalarType;
 
+struct CShapeView {
+  int64_t shape[4];
+  int ndim;
+};
+
 struct CTensorView {
   void *ptr = nullptr;
   int64_t shape[4];
@@ -83,4 +88,10 @@ void cuda_async_set(void *dptr, int v, int n, cudaStream_t stream);
 void cuda_scatter_tensor(CTensorView index, CTensorView src, int64_t dim, CTensorView dst, cudaStream_t stream);
 
 void cuda_softmax_tensor(CTensorView input, int algorithm, cudaStream_t stream, CTensorView output);
+
+void cuda_oneflow_rms_norm(CTensorView x, CTensorView weight, CShapeView normalized_shape, float epsilon,
+                           cudaStream_t stream, CTensorView inv_rms, CTensorView y);
+
+void fastertransformer_silu_activation(CTensorView a, CTensorView b, int num_token, int inter_size,
+                                       cudaStream_t stream);
 }

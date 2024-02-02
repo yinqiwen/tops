@@ -38,27 +38,20 @@
 //         }                                                                     \
 //     } while (0)
 
-#define CUDA_CHECK(fn)                                                                                                 \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        cudaError_t _cuda_error = fn;                                                                                  \
-        if (_cuda_error != cudaSuccess)                                                                                \
-        {                                                                                                              \
-            char cuda_err_msg[1024];                                                                                   \
-            snprintf(cuda_err_msg, sizeof(cuda_err_msg), "CUDA Error (%d): %s\n", (int) (_cuda_error),                 \
-                cudaGetErrorString(cudaGetLastError()));                                                               \
-                                                                                                                       \
-            if (_cuda_error == cudaErrorMemoryAllocation)                                                              \
-            {                                                                                                          \
-                throw std::runtime_error(cuda_err_msg);                                                                \
-            }                                                                                                          \
-            else if (_cuda_error == cudaErrorDevicesUnavailable)                                                       \
-            {                                                                                                          \
-                throw std::runtime_error(cuda_err_msg);                                                                \
-            }                                                                                                          \
-            else                                                                                                       \
-            {                                                                                                          \
-                throw std::runtime_error(cuda_err_msg);                                                                \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
+#define CUDA_CHECK(fn)                                                                          \
+  do {                                                                                          \
+    cudaError_t _cuda_error = fn;                                                               \
+    if (_cuda_error != cudaSuccess) {                                                           \
+      char cuda_err_msg[1024];                                                                  \
+      snprintf(cuda_err_msg, sizeof(cuda_err_msg), "CUDA Error (%d): %s\n", (int)(_cuda_error), \
+               cudaGetErrorString(cudaGetLastError()));                                         \
+                                                                                                \
+      if (_cuda_error == cudaErrorMemoryAllocation) {                                           \
+        throw std::runtime_error(cuda_err_msg);                                                 \
+      } else if (_cuda_error == cudaErrorDevicesUnavailable) {                                  \
+        throw std::runtime_error(cuda_err_msg);                                                 \
+      } else {                                                                                  \
+        throw std::runtime_error(cuda_err_msg);                                                 \
+      }                                                                                         \
+    }                                                                                           \
+  } while (0)
